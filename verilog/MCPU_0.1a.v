@@ -6,6 +6,9 @@
 // 10   /2004 Verilog version, unverified!
 //
 // t.boescke@tuhh.d
+// 
+// Modified by Ben Hencke 2019-11-18  to avoid inout types, dedicated rdata, wdata
+// (probably uses more cells, but works on the OSS FPGA tools)
 
 
 module mcpu(rdata,wdata,adress,oe,we,rst,clk);
