@@ -7,8 +7,32 @@
 //
 // t.boescke@tuhh.d
 // 
-// Modified by Ben Hencke 2019-11-18  to avoid inout types, dedicated rdata, wdata
+// Modified by Ben Hencke 2019-11-18 to avoid inout types, dedicated rdata, wdata
 // (probably uses more cells, but works on the OSS FPGA tools)
+// Add instruction set and state machine info (pulled from pdf)
+
+// Instruction set
+// Mnemonic | Opcode   | Description
+// NOR      | 00AAAAAA | Accu = Accu NOR mem[AAAAAA]
+// ADD      | 01AAAAAA | Accu = Accu + mem[AAAAAA], update carry 
+// STA      | 10AAAAAA | mem[AAAAAA] = Accu
+// JCC      | 11DDDDDD | Set PC to DDDDDD when carry = 0, clear carry
+
+// State machine
+// 000 = S0, 001 = S1, 010 = S2, 011 = S3, 101 = S5 (There is no S4)
+// S  | Function             | Operations                         | Next
+// S0 | Fetch instruction    | pc <= adreg + 1, adreg = data      | S0 if op=11,c=0 
+//    | /Operand adress      | oe <= 0, data <= Z                 | S5 if op=11,c=1
+//    |                      |                                    | S1 if op=10
+//    |                      |                                    | S2 if op=01
+//    |                      |                                    | S3 if op=00
+// S1 | Write akku to memory | we <= 0, data <= akku              | S0
+//    |                      | adreg <= pc                        |
+// S2 | Read operand, ADD    | oe <= 0, data <= z, adreg <= pc    | S0
+//    |                      | akku <= akku + data , update carry |
+// S3 | Read operand, NOR    | oe <= 0, data <= z, adreg <= pc    | S0
+//    |                      | akku <= akku NOR data              |
+// S5 | Clear carry, Read PC | carry <= 0, adreg <= pc            | S0
 
 
 module mcpu(rdata,wdata,adress,oe,we,rst,clk);
